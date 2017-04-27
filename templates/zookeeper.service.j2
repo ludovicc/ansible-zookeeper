@@ -2,14 +2,26 @@
 
 [Unit]
 Description=ZooKeeper
+{# LSC: Can't use the following, as it will fail to restart the downstream
+ # services in case of failure and proper restart of the upstream services.
+ #}
+#BindsTo=network.target
+
+Requires=network.target
+After=network.target
+
+{# LSC: Make sure that we are restarted if our upstream dependencies are
+ # restarted.
+ #}
+PartOf=mesos-master.service zookeeper.service network.target
 
 [Service]
 Type=simple
 User=zookeeper
 Group=zookeeper
 ExecStart={{zookeeper_dir}}/bin/zkServer.sh start-foreground
-
-TimeoutSec=300
+Restart=on-failure
+TimeoutSec=5
 
 [Install]
 WantedBy=multi-user.target
